@@ -79,6 +79,30 @@ func Insert(r InsertableRow, db *sql.DB) error {
 	return nil
 }
 
+func Update(r InsertableRow, db *sql.DB) error {
+	if r.GetID() == 0 {
+		return errors.New("doesn't have an ID")
+	}
+
+	err := r.Validate()
+	if err != nil {
+		return err
+	}
+
+	columns := r.Columns()[1:]
+	for i, column := range columns {
+		columns[i] = column + "=?"
+	}
+
+	query := "UPDATE " + r.Table() + " SET " + csv(columns) + " WHERE " + r.Columns()[0] + "=?"
+	_, err = db.Exec(query, append(r.Values(), r.GetID())...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func Select(r SelectableRow, id string, db *sql.DB) error {
 	row := db.QueryRow("SELECT "+csv(r.Columns())+" FROM "+r.Table()+" WHERE "+r.Columns()[0]+"=?", id)
 	err := row.Scan(r.ScanValues()...)
@@ -107,8 +131,8 @@ func SelectAll(rs SelectableRows, db *sql.DB) error {
 }
 
 func SelectAllBy(rs SelectableRows, column string, value string, db *sql.DB) error {
-	query := "SELECT " + csv(rs.Columns()) + " FROM " + rs.Table() + " WHERE "
-	query += column + "=?"
+	query := "SELECT " + csv(rs.Columns()) + " FROM " + rs.Table()
+	query += " WHERE " + column + "=?"
 	rows, err := db.Query(query, value)
 	if err != nil {
 		return err
