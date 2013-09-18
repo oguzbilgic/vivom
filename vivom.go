@@ -114,26 +114,18 @@ func Select(r SelectableRow, id string, db *sql.DB) error {
 }
 
 func SelectAll(rs SelectableRows, db *sql.DB) error {
-	rows, err := db.Query("SELECT " + csv(rs.Columns()) + " FROM " + rs.Table())
-	if err != nil {
-		return err
-	}
-
-	for rows.Next() {
-		r := rs.Next()
-		err := rows.Scan(r.ScanValues()...)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return SelectAllBy(rs, "", "", db)
 }
 
 func SelectAllBy(rs SelectableRows, column string, value string, db *sql.DB) error {
 	query := "SELECT " + csv(rs.Columns()) + " FROM " + rs.Table()
-	query += " WHERE " + column + "=?"
-	rows, err := db.Query(query, value)
+
+	if column != "" && value != "" {
+		// TODO Make sure this line is safe
+		query += " WHERE " + column + "=" + value
+	}
+
+	rows, err := db.Query(query)
 	if err != nil {
 		return err
 	}
