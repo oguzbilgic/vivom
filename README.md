@@ -39,7 +39,7 @@ func (s *Subscriber) TableName() string {
 }
 
 func (s *Subscriber) Columns() []string {
-	return []string{"name", "email", "date_added"}
+	return []string{"id", "name", "email", "date_added"}
 }
 
 func (s *Subscriber) Values() []interface{} {
