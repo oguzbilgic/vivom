@@ -34,7 +34,7 @@ func (s *Subscriber) Validate() error {
 	return nil
 }
 
-func (s *Subscriber) TableName() string {
+func (s *Subscriber) Table() string {
 	return "subscribers"
 }
 

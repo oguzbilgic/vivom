@@ -6,7 +6,7 @@ import (
 )
 
 type Row interface {
-	TableName() string
+	Table() string
 
 	// Columns returns column names of the table, starting with the primary key.
 	Columns() []string
@@ -63,7 +63,7 @@ func Insert(r InsertableRow, db *sql.DB) error {
 		return err
 	}
 
-	query := "INSERT INTO " + r.TableName() + " (" + csv(r.Columns()[1:]) + ") values (" + csQ(len(r.Columns())-1) + ")"
+	query := "INSERT INTO " + r.Table() + " (" + csv(r.Columns()[1:]) + ") values (" + csQ(len(r.Columns())-1) + ")"
 	res, err := db.Exec(query, r.Values()...)
 	if err != nil {
 		return err
@@ -80,7 +80,7 @@ func Insert(r InsertableRow, db *sql.DB) error {
 }
 
 func Select(r SelectableRow, id string, db *sql.DB) error {
-	row := db.QueryRow("SELECT "+csv(r.Columns())+" FROM "+r.TableName()+" WHERE "+r.Columns()[0]+"=?", id)
+	row := db.QueryRow("SELECT "+csv(r.Columns())+" FROM "+r.Table()+" WHERE "+r.Columns()[0]+"=?", id)
 	err := row.Scan(r.ScanValues()...)
 	if err != nil {
 		return err
@@ -90,7 +90,7 @@ func Select(r SelectableRow, id string, db *sql.DB) error {
 }
 
 func SelectAll(rs SelectableRows, db *sql.DB) error {
-	rows, err := db.Query("SELECT " + csv(rs.Columns()) + " FROM " + rs.TableName())
+	rows, err := db.Query("SELECT " + csv(rs.Columns()) + " FROM " + rs.Table())
 	if err != nil {
 		return err
 	}
@@ -107,7 +107,7 @@ func SelectAll(rs SelectableRows, db *sql.DB) error {
 }
 
 func SelectAllBy(rs SelectableRows, column string, value string, db *sql.DB) error {
-	query := "SELECT " + csv(rs.Columns()) + " FROM " + rs.TableName() + " WHERE "
+	query := "SELECT " + csv(rs.Columns()) + " FROM " + rs.Table() + " WHERE "
 	query += column + "=?"
 	rows, err := db.Query(query, value)
 	if err != nil {
