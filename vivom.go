@@ -1,3 +1,4 @@
+// Package vivom is a dead simple, tiny, but powerful ORM library.
 package vivom
 
 import (
