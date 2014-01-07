@@ -97,11 +97,8 @@ func Update(r InsertableRow, db *sql.DB) error {
 
 	query := "UPDATE " + r.Table() + " SET " + csv(columns) + " WHERE " + r.Columns()[0] + "=?"
 	_, err = db.Exec(query, append(r.Values(), r.GetID())...)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }
 
 func Select(r SelectableRow, id string, db *sql.DB) error {
