@@ -106,12 +106,7 @@ func Update(r InsertableRow, db *sql.DB) error {
 
 func Select(r SelectableRow, id string, db *sql.DB) error {
 	row := db.QueryRow("SELECT "+csv(r.Columns())+" FROM "+r.Table()+" WHERE "+r.Columns()[0]+"=?", id)
-	err := row.Scan(r.ScanValues()...)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return row.Scan(r.ScanValues()...)
 }
 
 func SelectAll(rs SelectableRows, db *sql.DB) error {
