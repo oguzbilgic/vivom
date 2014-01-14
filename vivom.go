@@ -54,7 +54,15 @@ func csQ(n int) string {
 	return csv(questions)
 }
 
-func Insert(r InsertableRow, db *sql.DB) error {
+type Vivom struct {
+	db *sql.DB
+}
+
+func New(db *sql.DB) *Vivom {
+	return &Vivom{db}
+}
+
+func (v *Vivom) Insert(r InsertableRow) error {
 	if r.GetID() != 0 {
 		return errors.New("can't insert tag with id")
 	}
@@ -65,7 +73,7 @@ func Insert(r InsertableRow, db *sql.DB) error {
 	}
 
 	query := "INSERT INTO " + r.Table() + " (" + csv(r.Columns()[1:]) + ") values (" + csQ(len(r.Columns())-1) + ")"
-	res, err := db.Exec(query, r.Values()...)
+	res, err := v.db.Exec(query, r.Values()...)
 	if err != nil {
 		return err
 	}
@@ -80,7 +88,7 @@ func Insert(r InsertableRow, db *sql.DB) error {
 	return nil
 }
 
-func Update(r InsertableRow, db *sql.DB) error {
+func (v *Vivom) Update(r InsertableRow) error {
 	if r.GetID() == 0 {
 		return errors.New("doesn't have an ID")
 	}
@@ -96,21 +104,21 @@ func Update(r InsertableRow, db *sql.DB) error {
 	}
 
 	query := "UPDATE " + r.Table() + " SET " + csv(columns) + " WHERE " + r.Columns()[0] + "=?"
-	_, err = db.Exec(query, append(r.Values(), r.GetID())...)
+	_, err = v.db.Exec(query, append(r.Values(), r.GetID())...)
 
 	return err
 }
 
-func Select(r SelectableRow, id string, db *sql.DB) error {
-	row := db.QueryRow("SELECT "+csv(r.Columns())+" FROM "+r.Table()+" WHERE "+r.Columns()[0]+"=?", id)
+func (v *Vivom) Select(r SelectableRow, id string) error {
+	row := v.db.QueryRow("SELECT "+csv(r.Columns())+" FROM "+r.Table()+" WHERE "+r.Columns()[0]+"=?", id)
 	return row.Scan(r.ScanValues()...)
 }
 
-func SelectAll(rs SelectableRows, db *sql.DB) error {
-	return SelectAllBy(rs, "", "", db)
+func (v *Vivom) SelectAll(rs SelectableRows) error {
+	return v.SelectAllBy(rs, "", "")
 }
 
-func SelectAllBy(rs SelectableRows, column string, value string, db *sql.DB) error {
+func (v *Vivom) SelectAllBy(rs SelectableRows, column string, value string) error {
 	query := "SELECT " + csv(rs.Columns()) + " FROM " + rs.Table()
 
 	if column != "" && value != "" {
@@ -118,7 +126,7 @@ func SelectAllBy(rs SelectableRows, column string, value string, db *sql.DB) err
 		query += " WHERE " + column + "=" + value
 	}
 
-	rows, err := db.Query(query)
+	rows, err := v.db.Query(query)
 	if err != nil {
 		return err
 	}
