@@ -1,4 +1,4 @@
-# Vivom
+# Vivom [![Build Status](https://travis-ci.org/oguzbilgic/vivom.png?branch=master)](https://travis-ci.org/oguzbilgic/vivom)
 
 dead simple, tiny, but powerful Go ORM library
 
